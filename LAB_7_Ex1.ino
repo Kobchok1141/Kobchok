@@ -1,55 +1,102 @@
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#define SCREEN_WIDTH 128 
-#define SCREEN_HEIGHT 64 
-#define OLED_RESET  -1 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-int Pushbutton1 = A0;
-int Pushbutton2 = A1;
-
-int buttonState1;
-int buttonState2;
-
-void setup() {
-
-pinMode(Pushbutton1, INPUT_PULLUP); 
-pinMode(Pushbutton2, INPUT_PULLUP);
-display.begin(SSD1306_SWITCHCAPVCC, 0x3c); 
-display.clearDisplay(); 
-//display.drawPixel(127, 63, WHITE);
-//display.drawLine(0, 63, 127, 21, WHITE);
-display.drawCircle(30, 25, 20, WHITE);
-display.drawCircle(100, 25, 20, WHITE);
-//display.fillCircle(30, 25, 20, WHITE);
-display.display();
-Serial.begin(9600);
-}
-
-void loop() {
- buttonState1 = digitalRead(Pushbutton1); 
- buttonState2 = digitalRead(Pushbutton2); 
- Serial.println(buttonState1);
- Serial.println(buttonState2);
- Serial.println("------------------");
- display.clearDisplay();
-
-if(buttonState1 == 1 && buttonState2 == 0)
+int clock_pin = 13;//SHCP
+int latch_pin = 10;//STCP
+int data_pin = 11;//DS
+int buttonLeft = A0;
+int buttonRight = A1;
+int c = 0 ;
+void setup()
 {
-  display.fillCircle(30, 25, 20, WHITE);
-  display.drawCircle(100, 25, 20, WHITE);
+  pinMode(clock_pin,OUTPUT);
+  pinMode(latch_pin,OUTPUT);
+  pinMode(data_pin,OUTPUT);
+  Serial.begin(9600);
 }
 
-
-if(buttonState1 == 1 && buttonState2 == 1){
-  display.fillCircle(30, 25, 20, WHITE);
-  display.fillCircle(100, 25, 20, WHITE);
+void reg(uint8_t updata){
+  for(int i=0;i<8;i++){
+     digitalWrite(data_pin,(updata>>7-i & 0b00000001));
+     digitalWrite(clock_pin,HIGH);
+     digitalWrite(clock_pin,LOW);
+     Serial.println(updata);
+     Serial.println("void reg end");
+  }
 }
-
-if(buttonState1 == 0 && buttonState2 == 1){
-  display.drawCircle(30, 25, 20, WHITE);
-  display.fillCircle(100, 25, 20, WHITE);
+void loop() {
+  // put your main code here, to run repeatedly:
+  if(Serial.available()>0){
+   int inputNum = Serial.read();
+    switch(inputNum){
+      case '0':
+      digitalWrite(latch_pin,LOW);
+      reg(0b00111111);
+      digitalWrite(latch_pin,HIGH);
+      Serial.println(inputNum);
+      delay(1000);//0
+      break;
+      case '1':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b00000110);
+      digitalWrite(latch_pin,HIGH);
+      break;
+      case '2':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01011011);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//2
+      break;
+      case '3':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01001111);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//3
+      break;
+      case '4':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01100110);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//4
+      break;
+      case '5':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01101101);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//5
+      break;
+      case '6':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01111101);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//6
+      break;
+      case '7':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b00000111);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//7
+      break;
+      case '8':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01111111);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//8
+      break;
+      case '9':
+      Serial.println(inputNum);
+      digitalWrite(latch_pin,LOW);
+      reg(0b01101111);
+      digitalWrite(latch_pin,HIGH);
+      delay(1000);//9
+      break;
+      default:
+      Serial.println("0-9 only");
+  }
 }
-display.display();
 }
